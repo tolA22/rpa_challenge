@@ -1,0 +1,5 @@
+
+rpaframework==24.1.2
+beautifulsoup4
+pandas 
+
