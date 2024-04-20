@@ -12,8 +12,7 @@ def run_aljazeera_news_pull():
     aljazeera_driver:AljazeeraDriver = AljazeeraDriver()
 
     payload:dict = workitems.inputs.current.payload
-    print(payload, "checking_payload")
-    search_phrase = payload.get("search_term")
+    search_phrase = payload.get("search_phrase")
     number_of_months = payload.get("number_of_months",0)
     search_phrase_is_valid:bool = validate_search_phrase(search_phrase)
     number_of_months_is_valid:bool = validate_number_of_months(number_of_months)
