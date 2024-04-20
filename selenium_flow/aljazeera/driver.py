@@ -73,7 +73,6 @@ class AljazeeraDriver(BaseDriver):
             
 
             logger.info("Click search icon")
-            # search_icon_xpath:str = 'xpath://*[@id="root"]/div/div[1]/div[1]/div/header/div[4]/div[2]/button'
             search_icon_xpath:str = 'xpath:/html/body/div[1]/div/div[1]/div[1]/div/header/div[4]/div[2]/button'
             self.click_xpath(search_icon_xpath,15)
             
@@ -81,12 +80,10 @@ class AljazeeraDriver(BaseDriver):
             logger.info(f"Inputing search phrase '{search_phrase}'")
 
             input_field_xpath:str = 'xpath://*[@id="root"]/div/div[1]/div[2]/div/div/form/div[1]/input'
-            # input_field_xpath:str = 'xpath://*[@id="main-content-area"]/div/div/div[2]/div/div/form/div[1]/input'
             
             self.input_xpath(input_field_xpath, search_phrase)
 
             search_field_icon:str = 'xpath://*[@id="root"]/div/div[1]/div[2]/div/div/form/div[2]/button'
-            # search_field_icon:str = 'xpath://*[@id="main-content-area"]/div/div/div[2]/div/div/form/div[2]/button'
             logger.info("Clicking search icon")
             try:
                 self.click_xpath(search_field_icon)
@@ -147,9 +144,6 @@ class AljazeeraDriver(BaseDriver):
 
             formatted_last_extracted_date = datetime.datetime.strptime(last_extracted_date,aljazeera_constant.DATE_FORMAT).date()
 
-            result.append(formatted_article)
-            count +=1 
-
             # checks
             if formatted_last_extracted_date < start_date_time:
                 stop_parsing = True 
@@ -157,6 +151,10 @@ class AljazeeraDriver(BaseDriver):
                 break
 
 
+            result.append(formatted_article)
+            count +=1 
+
+            
             if count > len(articles):
                 try:
                     logger.info("Clicking 'Show More'")
