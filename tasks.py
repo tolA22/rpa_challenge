@@ -35,9 +35,9 @@ def validate_number_of_months(number_of_months):
     """ 
     returns True if number_of_months is greater than , or equal to 0. otherwise returns False
     """
-    if not number_of_months:
+    if number_of_months is None:
         return False 
-    if type(number_of_months) != 'int':
+    if not isinstance(number_of_months,int):
         return False 
     
     return number_of_months >= 0
