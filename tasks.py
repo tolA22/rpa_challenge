@@ -40,4 +40,4 @@ def validate_number_of_months(number_of_months):
     if type(number_of_months) != 'int':
         return False 
     
-    return number_of_months > 0
+    return number_of_months >= 0
