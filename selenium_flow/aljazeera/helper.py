@@ -9,9 +9,10 @@ from bs4 import BeautifulSoup
 import pandas as pd 
 import os 
 import pathlib
+from RPA.Tables import Tables
 
-from aljazeera.constant import  DATE_FORMAT, FIXTURES_PATH
-from aljazeera.logger import logger
+from selenium_flow.aljazeera.constant import  DATE_FORMAT, FIXTURES_PATH
+from selenium_flow.aljazeera.logger import logger
 
 
 def get_start_and_end_date_from_current_month(number_of_months:int)->tuple:
@@ -171,3 +172,28 @@ def save_dataframe(dataframe:pd.DataFrame):
     os.makedirs(FIXTURES_PATH, exist_ok=True) 
     dataframe.to_csv(f'{FIXTURES_PATH}/news_report.csv', index=False)
     dataframe.to_excel(f'{FIXTURES_PATH}/news_report.xlsx', index=False)
+
+
+def convert_to_table(result:list[dict]):
+    """ 
+    converts list of dict to RPA Table object 
+    """
+    try:
+        table:Tables = Tables()
+        article_table =  table.create_table(result)
+        return article_table
+    except Exception as e:
+        logger.error(f"Error converting results to RPA.Tables object {e}")
+        raise e 
+
+def save_table_as_xlsx(article_table:Tables):
+    """ 
+     saves RPA Table object as excel file
+    """
+    try:
+        table:Tables = Tables()
+        table.write_table_to_csv(article_table,f'{FIXTURES_PATH}/news_report.xlsx')
+        table.write_table_to_csv(article_table,f'{FIXTURES_PATH}/news_report.csv')
+    except Exception as e:
+        logger.error(f"Error saving tables data {e}")
+        raise e 

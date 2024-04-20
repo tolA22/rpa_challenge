@@ -6,10 +6,10 @@ from typing import Optional
 
 import pandas as pd 
 
-from aljazeera.logger import logger
-from aljazeera import constant as aljazeera_constant
-from aljazeera.helper import extract_values_from_article_html, get_start_and_end_date_from_current_month, save_dataframe, validate_news_category
-from driver import BaseDriver
+from selenium_flow.aljazeera.logger import logger
+from selenium_flow.aljazeera import constant as aljazeera_constant
+from selenium_flow.aljazeera.helper import extract_values_from_article_html, get_start_and_end_date_from_current_month, save_dataframe, validate_news_category,convert_to_table, save_table_as_xlsx
+from selenium_flow.driver import BaseDriver
 
 class AljazeeraDriver(BaseDriver):
 
@@ -40,15 +40,25 @@ class AljazeeraDriver(BaseDriver):
         end_date_time:date
 
         date_time_format:str = "%Y-%m-%d" 
-        logger.info(f"Search Phrase --- {search_phrase}")
-        logger.info(f"pulling news from {start_date_time.strftime(date_time_format)} to {end_date_time.strftime(date_time_format)}")
+        logger.info(f"Input parameter_Search Phrase --- {search_phrase}")
+        logger.info(f"Input parameter_pulling news from {start_date_time.strftime(date_time_format)} to {end_date_time.strftime(date_time_format)}")
+
+        logger.info("Navigating to Aljazeera Website ") 
+        self.driver.open_available_browser(aljazeera_constant.WEBSITE_URL, headless=False, maximized=True,options='add_argument("--incognito")')
+        logger.info("Navigated to website ")
+        
 
         self.run_search_phrase(search_phrase)
         self.add_filters()
         results:list  = self.parse_results(search_phrase=search_phrase,start_date_time=start_date_time)
 
-        dataframe:pd.DataFrame = pd.DataFrame(results)
-        save_dataframe(dataframe)
+        logger.info("Converting result to RPA.Tables object")
+        article_table = convert_to_table(result=results)
+
+        logger.info(f"Saving results to fixtures path {aljazeera_constant.FIXTURES_PATH}")
+        save_table_as_xlsx(article_table=article_table)
+
+
 
 
     def run_search_phrase(self, search_phrase):
@@ -60,30 +70,30 @@ class AljazeeraDriver(BaseDriver):
             search_phrase (_type_): search phrase input
         """
         try:
-            logger.info("Navigating to Aljazeera Website ") 
-            self.driver.open_available_browser(aljazeera_constant.WEBSITE_URL)
-            logger.info("Navigated to website ")
+            
 
             logger.info("Click search icon")
-            search_icon_xpath:str = 'xpath://*[@id="root"]/div/div[1]/div[1]/div/header/div[4]/div[2]/button'
+            # search_icon_xpath:str = 'xpath://*[@id="root"]/div/div[1]/div[1]/div/header/div[4]/div[2]/button'
+            search_icon_xpath:str = 'xpath:/html/body/div[1]/div/div[1]/div[1]/div/header/div[4]/div[2]/button'
             self.click_xpath(search_icon_xpath,15)
             
 
             logger.info(f"Inputing search phrase '{search_phrase}'")
 
             input_field_xpath:str = 'xpath://*[@id="root"]/div/div[1]/div[2]/div/div/form/div[1]/input'
+            # input_field_xpath:str = 'xpath://*[@id="main-content-area"]/div/div/div[2]/div/div/form/div[1]/input'
             
             self.input_xpath(input_field_xpath, search_phrase)
 
             search_field_icon:str = 'xpath://*[@id="root"]/div/div[1]/div[2]/div/div/form/div[2]/button'
+            # search_field_icon:str = 'xpath://*[@id="main-content-area"]/div/div/div[2]/div/div/form/div[2]/button'
             logger.info("Clicking search icon")
             try:
                 self.click_xpath(search_field_icon)
             except Exception as e:
                 pass 
-            logger.info("Searching .......")
+            
 
-            # sleep(10)
             logger.info("Search complete ....")
         except Exception as e:
             logger.error(f'Could not run query for {search_phrase} -- {e}')
@@ -100,7 +110,7 @@ class AljazeeraDriver(BaseDriver):
         try:
             logger.info("Sorting by Date")
             sort_by_dropdown_xpath:str ='xpath://*[@id="search-sort-option"]'
-            self.click_xpath(sort_by_dropdown_xpath,30)
+            self.click_xpath(sort_by_dropdown_xpath,200)
 
             newest_option_xpath:str = 'xpath://*[@id="search-sort-option"]/option[1]'
             self.click_xpath(newest_option_xpath)
@@ -119,6 +129,7 @@ class AljazeeraDriver(BaseDriver):
 
         while not stop_parsing:
             article_block_xpath:str = 'xpath://*[@id="main-content-area"]/div[2]/div[2]/article'
+            self.driver.wait_until_element_is_visible(article_block_xpath,30)
             articles = self.driver.find_elements(article_block_xpath)
             logger.info(f"Found {len(articles)} articles")
             
@@ -134,7 +145,7 @@ class AljazeeraDriver(BaseDriver):
             if not last_extracted_date:
                 raise Exception("Date not found")
 
-            formatted_last_extracted_date = datetime.datetime.strptime(last_extracted_date,aljazeera_constant.DATE_FORMAT)
+            formatted_last_extracted_date = datetime.datetime.strptime(last_extracted_date,aljazeera_constant.DATE_FORMAT).date()
 
             result.append(formatted_article)
             count +=1 
