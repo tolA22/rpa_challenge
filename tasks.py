@@ -22,7 +22,7 @@ def run_aljazeera_news_pull():
     if not number_of_months_is_valid:
         raise Exception("'number_of_months' is invalid")
     
-    aljazeera_driver.run_process(search_phrase=search_phrase, number_of_months=number_of_months) #valid
+    aljazeera_driver.run_process(search_phrase=search_phrase, number_of_months=number_of_months,) #valid
 
 
 def validate_search_phrase(search_phrase):

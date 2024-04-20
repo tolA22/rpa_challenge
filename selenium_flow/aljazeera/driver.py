@@ -22,7 +22,7 @@ class AljazeeraDriver(BaseDriver):
         ...
          
 
-    def run_process(self, search_phrase:str, number_of_months:int, news_category:Optional[str]):
+    def run_process(self, search_phrase:str, number_of_months:int, news_category:Optional[str]=None):
         """
         
         runs the whole extraction and formatting process
