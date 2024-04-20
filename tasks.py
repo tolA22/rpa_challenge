@@ -28,7 +28,9 @@ def validate_search_phrase(search_phrase):
     """ 
     returns True if search_phrase is not empty; returns False if search_phrase is empty
     """
-    return not search_phrase
+    if not search_phrase:
+        return False 
+    return True
 
 def validate_number_of_months(number_of_months):
     """ 
