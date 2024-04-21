@@ -4,6 +4,7 @@ from robocorp import workitems
 from selenium_flow.aljazeera import constant as aljazeera_constants
 from selenium_flow.aljazeera.driver import AljazeeraDriver 
 
+from exceptions import SearchPhraseEmptyException, NumberOfMonthsEmptyException,NumberOfMonthsInvalidTypeException , NumberOfMonthsInvalidValueTypeException
 
 @task 
 def run_aljazeera_news_pull():
@@ -14,31 +15,29 @@ def run_aljazeera_news_pull():
     payload:dict = workitems.inputs.current.payload
     search_phrase = payload.get("search_phrase")
     number_of_months = payload.get("number_of_months",0)
-    search_phrase_is_valid:bool = validate_search_phrase(search_phrase)
-    number_of_months_is_valid:bool = validate_number_of_months(number_of_months)
-    if not search_phrase_is_valid:
-        raise Exception("'search_phrase' is invalid|missing")
-    if not number_of_months_is_valid:
-        raise Exception("'number_of_months' is invalid")
+    validate_search_phrase(search_phrase)
+    validate_number_of_months(number_of_months)
     
     aljazeera_driver.run_process(search_phrase=search_phrase, number_of_months=number_of_months,) #valid
 
 
 def validate_search_phrase(search_phrase):
     """ 
-    returns True if search_phrase is not empty; returns False if search_phrase is empty
+    raise Exception if search_phrase is empty
     """
     if not search_phrase:
-        return False 
-    return True
+        raise SearchPhraseEmptyException(search_phrase=search_phrase) 
+    
 
 def validate_number_of_months(number_of_months):
     """ 
-    returns True if number_of_months is greater than , or equal to 0. otherwise returns False
+    raise Exceptions if number_of_months is empty or invalid
     """
     if number_of_months is None:
-        return False 
+        raise NumberOfMonthsEmptyException(number_of_months=number_of_months) 
     if not isinstance(number_of_months,int):
-        return False 
+        raise NumberOfMonthsInvalidTypeException(number_of_months=number_of_months)
+    if number_of_months < 0:
+        raise NumberOfMonthsInvalidValueTypeException(number_of_months=number_of_months)
     
-    return number_of_months >= 0
+    
